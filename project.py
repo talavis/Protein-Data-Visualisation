@@ -8,8 +8,11 @@ if len(sys.argv) == 1 :
     sys.stderr.write('Using standard data set, to use other data:\n'.format(sys.argv[0]))
     sys.stderr.write('Usage: {0}  <pdb file> <connection file> |<protname> <data file>| [repeat || for multiple proteins]\n'.format(sys.argv[0]))
     INDATA = ('1U3W.pdb', 'adh_connections.txt',
-              ('ADH1' , 'adh1_scores.txt'))#,
-#              ('ADH3', 'adh3_scores.txt'))
+              ('ADH1', 'adh1_scores.txt'),
+              ('ADH2', 'adh2_scores.txt'),
+              ('ADH3', 'adh3_scores.txt'),
+              ('ADH4', 'adh4_scores.txt'),
+              ('ADH5', 'adh5_scores.txt'))
 elif len(sys.argv) > 3 and len(sys.argv) % 2 != 1 :
     sys.stderr.write('Usage: {0} <pdb file> <connection file> |<protname> <data file>| [repeat || for multiple proteins]\n'.format(sys.argv[0]))
     sys.exit()
@@ -85,16 +88,24 @@ class Interface :
         return menuBar
     
     def initUI(self) :
-        self.root = Tkinter.Tk() 
-        self.renderWidget = vtkTkRenderWidget(self.root,width=800,height=800)
-        self.renderWidget.pack(expand='true', fill='both')
+        # initialise tkinter
+        self.root = Tkinter.Tk()
+        self.root.config(menu = self.initMenu())
+        self.root.title('ADH residue uniqueness')
         
+        # vtk
+        self.renderWidget = vtkTkRenderWidget(self.root, width=800, height=800)
+        self.renderWidget.pack(expand='true', fill='both')        
         wMain = self.renderWidget.GetRenderWindow()
         wMain.AddRenderer(self.initVtk())
 
-        self.root.config(menu = self.initMenu())
-        self.root.wm_title('ADH residue uniqueness')
-
+        # tkinter ui
+        # protein toggle
+        self._proteinStructureVisible = Tkinter.IntVar()
+        self._proteinStructureVisible.set(1)
+        self._toggleProteinBox = Tkinter.Checkbutton(self.root, text = 'Show protein structure',
+                                                     command = self.toggleProteinStructure, state = 'active',
+                                                     var = self._proteinStructureVisible)
         self.root.mainloop()
     
     def initVtk(self) :
@@ -180,6 +191,11 @@ class Interface :
 
         return data
 
+    def toggleProteinStructure(self) :
+        print(self._proteinStructureVisible.get())
+        self._protStruct.SetVisibility(self._proteinStructureVisible.get())
+        self.renderWidget.GetRenderWindow().Render()
+        
     def updateVtkColors(self, minValue, maxValue) :
         self._lut.SetTableRange(minValue, maxValue)
     
