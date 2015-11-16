@@ -214,7 +214,6 @@ class Interface :
         self._lut.SetValueRange(1.0, 1.0)
         self._lut.SetSaturationRange(1.0, 1.0)
         self._lut.SetTableRange(0.0, 1.0)
-#        self._lut.SetScaleToLog10()
         
     def initVtkProtein(self, pdbFile) :
         reader = vtk.vtkPDBReader()
@@ -242,7 +241,6 @@ class Interface :
 
     def toggleProteinData(self) :
         '''Check which proteins are active and make them visible, and request color table update'''
-        # set color scale            
         # upgrade visibility
         for i in range(len(self._toggleDataVars)) :
             self._proteins[i].atoms.SetVisibility(self._toggleDataVars[i].get())
