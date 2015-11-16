@@ -8,11 +8,11 @@ if len(sys.argv) == 1 :
     sys.stderr.write('Using standard data set, to use other data:\n'.format(sys.argv[0]))
     sys.stderr.write('Usage: {0}  <pdb file> <connection file> |<protname> <data file>| [repeat || for multiple proteins]\n'.format(sys.argv[0]))
     INDATA = ('1U3W.pdb', 'adh_connections.txt',
-              ('ADH1', 'adh1_scores.txt'),
-              ('ADH2', 'adh2_scores.txt'),
-              ('ADH3', 'adh3_scores.txt'),
-              ('ADH4', 'adh4_scores.txt'),
-              ('ADH5', 'adh5_scores.txt'))
+              ('ADH1', 'adh1_conservation.txt'),
+              ('ADH2', 'adh2_conservation.txt'),
+              ('ADH3', 'adh3_conservation.txt'),
+              ('ADH4', 'adh4_conservation.txt'),
+              ('ADH5', 'adh5_conservation.txt'))
 elif len(sys.argv) > 3 and len(sys.argv) % 2 != 1 :
     sys.stderr.write('Usage: {0} <pdb file> <connection file> |<protname> <data file>| [repeat || for multiple proteins]\n'.format(sys.argv[0]))
     sys.exit()
@@ -150,8 +150,8 @@ class Interface :
             main.AddActor(self._proteins[i].atoms)
             main.AddActor(self._proteins[i].bonds)
             self.updateVtkColors(*self._proteins[i].data.GetScalarRange())
-        self._aSBar = self.initVtkBar()
-        main.AddActor(self._aSBar)
+#        self._aSBar = self.initVtkBar()
+#        main.AddActor(self._aSBar)
         main.ResetCamera()
 
         return main
@@ -210,10 +210,11 @@ class Interface :
     
     def initVtkColors(self) :
         self._lut = vtk.vtkLookupTable()
-        self._lut.SetHueRange(0.5, 0.0)
+        self._lut.SetHueRange(0.667, 0.0)
         self._lut.SetValueRange(1.0, 1.0)
         self._lut.SetSaturationRange(1.0, 1.0)
         self._lut.SetTableRange(0.0, 1.0)
+        self._lut.SetScaleToLog10()
         
     def initVtkProtein(self, pdbFile) :
         reader = vtk.vtkPDBReader()
@@ -247,7 +248,7 @@ class Interface :
             self._proteins[i].bonds.SetVisibility(self._toggleDataVars[i].get())
 
         # also update the color bar
-        self.updateVtkColors(*self.getScoreRange())
+#        self.updateVtkColors(*self.getScoreRange())
 
         self.renderWidget.GetRenderWindow().Render()
 
