@@ -63,7 +63,7 @@ class Protein :
     
 class Interface :
     def __init__(self, indata) :
-        self.proteins = list()
+        self._proteins = list()
         self._protStruct = self.initVtkProtein(indata[0])
         self._protCoord = read_data.read_points(indata[0])
         self._protConnections = read_data.read_connections(indata[1])
@@ -77,7 +77,7 @@ class Interface :
         data = self.readData(dataFile)
         aAtoms = self.initVtkAtoms(data)
         aBonds = self.initVtkBonds(data)
-        self.proteins.append(Protein(protName, data, aAtoms, aBonds))
+        self._proteins.append(Protein(protName, data, aAtoms, aBonds))
         
     def initMenu(self) :
         menuBar = Tkinter.Menu(self.root)
@@ -103,27 +103,33 @@ class Interface :
         # protein toggle
         self._proteinStructureVisible = Tkinter.IntVar()
         self._proteinStructureVisible.set(1)
-        self._toggleProteinBox = Tkinter.Checkbutton(self.root, text = 'Show protein structure',
-                                                     command = self.toggleProteinStructure, state = 'active',
-                                                     var = self._proteinStructureVisible)
-        self._toggleProteinBox.pack()
-        self.toggleDataVars = list()
-        self.toggleDataBoxes = list()
-        for i in range(len(self.proteins)) :
+        self._toggleProteinStructureBox = Tkinter.Checkbutton(self.root, text = 'Show protein structure',
+                                                              command = self.toggleProteinStructure, state = 'active',
+                                                              var = self._proteinStructureVisible)
+        self._toggleProteinStructureBox.pack()
+        self._toggleDataVars = list()
+        self._toggleDataBoxes = list()
+        for i in range(len(self._proteins)) :
             varData = Tkinter.IntVar()
-            boxData = Tkinter.Checkbutton(self.root, text = 'Show protein structure',
-                                          command = self.toggleProteinStructure, state = 'active',
-                                          var = self._proteinStructureVisible)
+            varData.set(1)
+            # I've been unable to find an efficient way to set visibility on/off, so the function will check all proteins
+            boxData = Tkinter.Checkbutton(self.root, text = 'Show data of {protname}'.format(protname = self._proteins[i].name),
+                                          command = self.toggleProteinData, state = 'active',
+                                          var = varData)
+            boxData.pack()
+            self._toggleDataVars.append(varData)
+            self._toggleDataBoxes.append(boxData)
+        
         self.root.mainloop()
     
     def initVtk(self) :
         main = vtk.vtkRenderer()
         main.SetBackground(0.2, 0.2, 0.2)
         main.AddActor(self._protStruct)
-        for i in range(len(self.proteins)) :
-            main.AddActor(self.proteins[i].atoms)
-            main.AddActor(self.proteins[i].bonds)
-            self.updateVtkColors(*self.proteins[i].data.GetScalarRange())
+        for i in range(len(self._proteins)) :
+            main.AddActor(self._proteins[i].atoms)
+            main.AddActor(self._proteins[i].bonds)
+            self.updateVtkColors(*self._proteins[i].data.GetScalarRange())
         main.ResetCamera()
 
         return main
@@ -199,8 +205,13 @@ class Interface :
 
         return data
 
+    def toggleProteinData(self) :
+        for i in range(len(self._toggleDataVars)) :
+            self._proteins[i].atoms.SetVisibility(self._toggleDataVars[i].get())
+            self._proteins[i].bonds.SetVisibility(self._toggleDataVars[i].get())
+        self.renderWidget.GetRenderWindow().Render()
+
     def toggleProteinStructure(self) :
-        print(self._proteinStructureVisible.get())
         self._protStruct.SetVisibility(self._proteinStructureVisible.get())
         self.renderWidget.GetRenderWindow().Render()
         
