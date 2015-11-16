@@ -106,6 +106,14 @@ class Interface :
         self._toggleProteinBox = Tkinter.Checkbutton(self.root, text = 'Show protein structure',
                                                      command = self.toggleProteinStructure, state = 'active',
                                                      var = self._proteinStructureVisible)
+        self._toggleProteinBox.pack()
+        self.toggleDataVars = list()
+        self.toggleDataBoxes = list()
+        for i in range(len(self.proteins)) :
+            varData = Tkinter.IntVar()
+            boxData = Tkinter.Checkbutton(self.root, text = 'Show protein structure',
+                                          command = self.toggleProteinStructure, state = 'active',
+                                          var = self._proteinStructureVisible)
         self.root.mainloop()
     
     def initVtk(self) :
