@@ -74,10 +74,27 @@ class Interface :
         self.initUI()
 
     def addProtein(self, protName, dataFile) :
+        '''Add a protein'''
         data = self.readData(dataFile)
         aAtoms = self.initVtkAtoms(data)
         aBonds = self.initVtkBonds(data)
         self._proteins.append(Protein(protName, data, aAtoms, aBonds))
+        
+    def doMenuFileExit(self):
+        sys.exit(0)
+
+    def getScoreRange(self) :
+        '''Get the score range for the protein data sets that are currently visible'''
+        maxScore = 0
+        minScore = 0
+        for i in range(len(self._toggleDataVars)) :
+            if self._toggleDataVars[i].get() > 0 :
+                low, high = self._proteins[i].data.GetScalarRange()
+                if minScore == 0 or low < minScore :
+                    minScore = low
+                if high > maxScore :
+                    maxScore = high
+        return minScore, maxScore
         
     def initMenu(self) :
         menuBar = Tkinter.Menu(self.root)
@@ -133,15 +150,12 @@ class Interface :
             main.AddActor(self._proteins[i].atoms)
             main.AddActor(self._proteins[i].bonds)
             self.updateVtkColors(*self._proteins[i].data.GetScalarRange())
-<<<<<<< HEAD
 #        self._aSBar = self.initVtkBar()
 #        main.AddActor(self._aSBar)
-=======
->>>>>>> parent of daebe09... Most things working, but can't get correct color scaling
         main.ResetCamera()
 
         return main
-
+    
     def initVtkAtoms(self, data) :
         sAtom = vtk.vtkSphereSource()
         sAtom.SetRadius(0.5)
@@ -162,6 +176,21 @@ class Interface :
 
         return aAtom
 
+    def initVtkBar(self) :
+        aSBar = vtk.vtkScalarBarActor()
+        aSBar.SetOrientationToVertical()
+        aSBar.SetLookupTable(self._lut)
+        aSBar.SetTitle("Residue score")
+        aSBar.GetLabelTextProperty().SetColor(0.8, 0.8, 0.8)
+        aSBar.GetTitleTextProperty().SetColor(0.8, 0.8, 0.8)
+        aSBar.SetWidth(0.1)
+        aSBar.SetHeight(0.9)
+        spc = aSBar.GetPositionCoordinate()
+        spc.SetCoordinateSystemToNormalizedViewport()
+        spc.SetValue(0.05, 0.05)
+
+        return aSBar
+    
     def initVtkBonds(self, data) :
         bond = vtk.vtkTubeFilter()
         bond.SetNumberOfSides(6)
@@ -184,15 +213,9 @@ class Interface :
         self._lut.SetHueRange(0.667, 0.0)
         self._lut.SetValueRange(1.0, 1.0)
         self._lut.SetSaturationRange(1.0, 1.0)
-<<<<<<< HEAD
         self._lut.SetTableRange(0.0, 1.0)
         self._lut.SetScaleToLog10()
         
-=======
-        self._lut.SetScaleToLog10
-        self._lut.SetTableRange(0,1000)
-    
->>>>>>> parent of daebe09... Most things working, but can't get correct color scaling
     def initVtkProtein(self, pdbFile) :
         reader = vtk.vtkPDBReader()
         reader.SetFileName(pdbFile)
@@ -209,9 +232,6 @@ class Interface :
         
         return aProtein
 
-    def doMenuFileExit(self):
-        sys.exit(0)
-
     def readData(self, scoreFile) :
         data = vtk.vtkPolyData()
         data.SetPoints(self._protCoord)
@@ -221,7 +241,6 @@ class Interface :
         return data
 
     def toggleProteinData(self) :
-<<<<<<< HEAD
         '''Check which proteins are active and make them visible, and request color table update'''
         # upgrade visibility
         for i in range(len(self._toggleDataVars)) :
@@ -231,18 +250,15 @@ class Interface :
         # also update the color bar
 #        self.updateVtkColors(*self.getScoreRange())
 
-=======
-        for i in range(len(self._toggleDataVars)) :
-            self._proteins[i].atoms.SetVisibility(self._toggleDataVars[i].get())
-            self._proteins[i].bonds.SetVisibility(self._toggleDataVars[i].get())
->>>>>>> parent of daebe09... Most things working, but can't get correct color scaling
         self.renderWidget.GetRenderWindow().Render()
 
     def toggleProteinStructure(self) :
+        '''Toggle the protein structure'''
         self._protStruct.SetVisibility(self._proteinStructureVisible.get())
         self.renderWidget.GetRenderWindow().Render()
         
     def updateVtkColors(self, minValue, maxValue) :
+        '''Update the value range of the color table'''
         self._lut.SetTableRange(minValue, maxValue)
     
 if __name__ == '__main__' :
