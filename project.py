@@ -111,14 +111,17 @@ class Interface :
         self._toggleDataBoxes = list()
         for i in range(len(self._proteins)) :
             varData = Tkinter.IntVar()
-            varData.set(1)
-            # I've been unable to find an efficient way to set visibility on/off, so the function will check all proteins
+            varData.set(0)
+            # I've been unable to find a way to only update current protein
+            # so the function will check the status of all proteins (datasets)
             boxData = Tkinter.Checkbutton(self.root, text = 'Show data of {protname}'.format(protname = self._proteins[i].name),
                                           command = self.toggleProteinData, state = 'active',
                                           var = varData)
             boxData.pack()
             self._toggleDataVars.append(varData)
             self._toggleDataBoxes.append(boxData)
+            # make sure the checkboxes match the data shown from start
+            self.toggleProteinData()
         
         self.root.mainloop()
     
@@ -176,6 +179,7 @@ class Interface :
         self._lut.SetHueRange(0.667, 0.0)
         self._lut.SetValueRange(1.0, 1.0)
         self._lut.SetSaturationRange(1.0, 1.0)
+        self._lut.SetScaleToLog10
         self._lut.SetTableRange(0,1000)
     
     def initVtkProtein(self, pdbFile) :
