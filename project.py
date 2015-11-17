@@ -88,8 +88,14 @@ class Interface :
 
     def getScoreRange(self) :
         '''Get the score range for the protein data sets that are currently visible'''
-        low, high = self._proteins[self._currentData1.get()].data.GetScalarRange()
-        return low, high
+        maxScore = 0
+        # minScore will be 0
+        minScore = 0
+        for i in range(len(self._proteins)) :
+            low, high = self._proteins[self._currentData1.get()].data.GetScalarRange()
+            if maxScore == 0 or high > maxScore :
+                maxScore = high
+        return minScore, maxScore
     
     def initUI(self) :
         '''Initialize the UI'''
@@ -119,7 +125,7 @@ class Interface :
         dataManager = Tkinter.Frame(settingsManager)
         dataManager.pack()
         
-        groupData1 = Tkinter.LabelFrame(dataManager, text='Data', padx = 5, pady = 5)
+        groupData1 = Tkinter.LabelFrame(dataManager, text = 'Data', padx = 5, pady = 5)
         groupData1.pack(padx = 10, pady = 10, side = Tkinter.LEFT, anchor = Tkinter.N)
 
         self._currentData1 = Tkinter.IntVar()
@@ -130,7 +136,6 @@ class Interface :
                                 command = self.toggleProteinData,
                                 var = self._currentData1,
                                 value = i).pack(anchor = Tkinter.W)
-            # make sure the correct data is shown from start
             
         groupData2 = Tkinter.LabelFrame(dataManager, text='Compare with', padx = 5, pady = 5)
         groupData2.pack(padx = 10, pady = 10, side = Tkinter.RIGHT)
@@ -143,11 +148,35 @@ class Interface :
                                 command = self.toggleProteinData,
                                 var = self._currentData2,
                                 value = i).pack(anchor = Tkinter.W)
-            # make sure the correct data is shown from start
 
-        self._root.mainloop()
+        # make sure the correct data set is shown
+        self.toggleProteinData()
+
+        # color scaling
+        colorManager = Tkinter.LabelFrame(settingsManager, text = 'Color scaling', padx = 5, pady = 5)
+        colorManager.pack()
+
+        colorManagerLow = Tkinter.LabelFrame(colorManager, text = 'Lower limit', padx = 5, pady = 5)
+        colorManagerLow.pack(side = Tkinter.LEFT)
+        self._colorLow = Tkinter.StringVar()
+        self._colorLow.set("0")
+        self._colorScalerLow = Tkinter.Spinbox(colorManagerLow, from_ = 0, to = self.getScoreRange()[1],
+                                               textvariable = self._colorLow, width = 8,
+                                               command = self.updateColorScale, increment = 0.1)
+        self._colorScalerLow.pack()
+
+        colorManagerHigh = Tkinter.LabelFrame(colorManager, text = 'Upper limit', padx = 5, pady = 5)
+        colorManagerHigh.pack(side = Tkinter.RIGHT)
+        self._colorHigh = Tkinter.StringVar()
+        self._colorHigh.set(str(self.getScoreRange()[1]))
+        self._colorScalerHigh = Tkinter.Spinbox(colorManagerHigh, from_ = 0, to = self.getScoreRange()[1],
+                                                textvariable = self._colorHigh, width = 8,
+                                                command = self.updateColorScale, increment = 0.1)
+        self._colorScalerHigh.pack(side = Tkinter.RIGHT)
         
-        self.toggleProteinData()    
+        
+        self._root.mainloop()
+
     def initVtk(self) :
         '''Initialize the VTK renderer'''
         main = vtk.vtkRenderer()
@@ -293,6 +322,20 @@ class Interface :
     def updateVtkColors(self, minValue, maxValue) :
         '''Update the value range of the color table'''
         self._lut.SetTableRange(minValue, maxValue)
-    
+        self._dataVisualiserBonds[0].GetMapper().SetScalarRange(minValue, maxValue)
+        self._dataVisualiserBonds[0].GetMapper().Modified()
+        self._dataVisualiserBonds[0].GetMapper().Update()
+        self._dataVisualiserAtoms[0].GetMapper().SetScalarRange(minValue, maxValue)
+        self._dataVisualiserAtoms[0].GetMapper().Modified()
+        self._dataVisualiserAtoms[0].GetMapper().Update()
+        
+    def updateColorScale(self) :
+        self._colorScalerHigh.config(from_ = self._colorLow.get())
+        self._colorScalerLow.config(to = self._colorHigh.get())
+        if float(self._colorHigh.get()) < float(self._colorLow.get()) :
+            self._colorHigh = self._colorLow.get()
+        self.updateVtkColors(float(self._colorLow.get()), float(self._colorHigh.get()))
+        self.renderWidget.GetRenderWindow().Render()
+            
 if __name__ == '__main__' :
     interface = Interface(INDATA)
