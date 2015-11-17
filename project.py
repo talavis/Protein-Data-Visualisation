@@ -99,7 +99,7 @@ class Interface :
         return low, high
         
     def initMenu(self) :
-        menuBar = Tkinter.Menu(self.root)
+        menuBar = Tkinter.Menu(self._root)
         menuFile = Tkinter.Menu(menuBar, tearoff=0)
         menuFile.add_command(label='Exit', command=self.doMenuFileExit)
         menuBar.add_cascade(label='File', menu=menuFile)
@@ -109,30 +109,33 @@ class Interface :
     def initUI(self) :
         '''Initialize the UI'''
         # initialise tkinter
-        self.root = Tkinter.Tk()
-        self.root.config(menu = self.initMenu())
-        self.root.title('ADH residue uniqueness')
+        self._root = Tkinter.Tk()
+        self._root.config(menu = self.initMenu())
+        self._root.title('ADH residue uniqueness')
         
+        # tkinter ui
         # vtk
-        self.renderWidget = vtkTkRenderWidget(self.root, width=800, height=800)
-        self.renderWidget.pack(expand='true', fill='both')        
+        self.renderWidget = vtkTkRenderWidget(self._root, width=800, height=800)
+        self.renderWidget.pack(expand='true', fill='both', side = Tkinter.RIGHT)
         wMain = self.renderWidget.GetRenderWindow()
         wMain.AddRenderer(self.initVtk())
 
-        # tkinter ui
         # toggle protein structure
+        settingsManager = Tkinter.Frame(self._root)
+        settingsManager.pack(side = Tkinter.LEFT)
+        
         self._proteinStructureVisible = Tkinter.IntVar()
         self._proteinStructureVisible.set(1)
-        self._toggleProteinStructureBox = Tkinter.Checkbutton(self.root, text = 'Show protein structure',
+        self._toggleProteinStructureBox = Tkinter.Checkbutton(settingsManager, text = 'Show protein structure',
                                                               command = self.toggleProteinStructure, state = 'active',
                                                               var = self._proteinStructureVisible)
         self._toggleProteinStructureBox.pack()
 
         # toggle current data set
-        manager = Tkinter.Frame(self.root)
-        manager.pack()
+        dataManager = Tkinter.Frame(settingsManager)
+        dataManager.pack()
         
-        groupData1 = Tkinter.LabelFrame(manager, text='Data', padx = 5, pady = 5)
+        groupData1 = Tkinter.LabelFrame(dataManager, text='Data', padx = 5, pady = 5)
         groupData1.pack(padx = 10, pady = 10, side = Tkinter.LEFT, anchor = Tkinter.N)
 
         self._currentData1 = Tkinter.IntVar()
@@ -146,7 +149,7 @@ class Interface :
             # make sure the correct data is shown from start
             self.toggleProteinData()
             
-        groupData2 = Tkinter.LabelFrame(manager, text='Compare with', padx = 5, pady = 5)
+        groupData2 = Tkinter.LabelFrame(dataManager, text='Compare with', padx = 5, pady = 5)
         groupData2.pack(padx = 10, pady = 10, side = Tkinter.RIGHT)
 
         self._currentData2 = Tkinter.IntVar()
@@ -164,7 +167,7 @@ class Interface :
                             var = self._currentData1,
                             value = len(self._proteins) + 1).pack(anchor = Tkinter.W)
             
-        self.root.mainloop()
+        self._root.mainloop()
     
     def initVtk(self) :
         '''Initialize the VTK renderer'''
@@ -292,9 +295,6 @@ class Interface :
             else :
                 self._proteins[i].atoms.SetVisibility(0)
                 self._proteins[i].bonds.SetVisibility(0)
-
-        # also update the color bar
-        self.updateVtkColors(*self.getScoreRange())
 
         self.renderWidget.GetRenderWindow().Render()
 
