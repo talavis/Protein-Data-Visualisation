@@ -31,14 +31,14 @@ def read_points(fileName):
 
 def read_scalars(fileName):
     '''Read scores'''
-    scalars = vtk.vtkFloatArray()
+    scalars = list()
     text_file = open(fileName)
     line = text_file.readline()
     while line:
         data = string.split(line)
         if data and data[0] != '#':
             x = float(data[0])
-            scalars.InsertNextValue(x)
+            scalars.append(x)
         line = text_file.readline()
     text_file.close()
     return scalars
