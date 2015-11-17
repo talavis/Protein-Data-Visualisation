@@ -95,16 +95,8 @@ class Interface :
 
     def getScoreRange(self) :
         '''Get the score range for the protein data sets that are currently visible'''
-        maxScore = 0
-        minScore = 0
-        for i in range(len(self._toggleDataVars)) :
-            if self._toggleDataVars[i].get() > 0 :
-                low, high = self._proteins[i].data.GetScalarRange()
-                if minScore == 0 or low < minScore :
-                    minScore = low
-                if high > maxScore :
-                    maxScore = high
-        return minScore, maxScore
+        low, high = self._proteins[self._currentData1.get()].data.GetScalarRange()
+        return low, high
         
     def initMenu(self) :
         menuBar = Tkinter.Menu(self.root)
@@ -128,36 +120,49 @@ class Interface :
         wMain.AddRenderer(self.initVtk())
 
         # tkinter ui
-        # protein toggle
+        # toggle protein structure
         self._proteinStructureVisible = Tkinter.IntVar()
         self._proteinStructureVisible.set(1)
         self._toggleProteinStructureBox = Tkinter.Checkbutton(self.root, text = 'Show protein structure',
                                                               command = self.toggleProteinStructure, state = 'active',
                                                               var = self._proteinStructureVisible)
         self._toggleProteinStructureBox.pack()
-        self._toggleDataVars = list()
-        self._toggleDataBoxes = list()
-        for i in range(len(self._proteins)) :
-            varData = Tkinter.IntVar()
-            varData.set(0)
-            # I've been unable to find a way to only update current protein
-            # so the function will check the status of all proteins (datasets)
-            boxData = Tkinter.Checkbutton(self.root, text = 'Show data of {protname}'.format(protname = self._proteins[i].name),
-                                          command = self.toggleProteinData, state = 'active',
-                                          var = varData)
-            boxData.pack()
-            self._toggleDataVars.append(varData)
-            self._toggleDataBoxes.append(boxData)
-            # make sure the checkboxes match the data shown from start
-            self.toggleProteinData()
 
-        # display unified data sets
-        self._dataUnified = Tkinter.IntVar()
-        self._dataUnified.set(0)
-        self._toggleProteinStructureBox = Tkinter.Checkbutton(self.root, text = 'Display unified Data',
-                                                              command = self.toggleProteinStructure, state = 'active',
-                                                              var = self._proteinStructureVisible)
+        # toggle current data set
+        manager = Tkinter.Frame(self.root)
+        manager.pack()
         
+        groupData1 = Tkinter.LabelFrame(manager, text='Data', padx = 5, pady = 5)
+        groupData1.pack(padx = 10, pady = 10, side = Tkinter.LEFT, anchor = Tkinter.N)
+
+        self._currentData1 = Tkinter.IntVar()
+        self._currentData1.set(0)
+
+        for i in range(len(self._proteins)) :
+            Tkinter.Radiobutton(groupData1, text = self._proteins[i].name,
+                                command = self.toggleProteinData,
+                                var = self._currentData1,
+                                value = i).pack(anchor = Tkinter.W)
+            # make sure the correct data is shown from start
+            self.toggleProteinData()
+            
+        groupData2 = Tkinter.LabelFrame(manager, text='Compare with', padx = 5, pady = 5)
+        groupData2.pack(padx = 10, pady = 10, side = Tkinter.RIGHT)
+
+        self._currentData2 = Tkinter.IntVar()
+        self._currentData2.set(len(self._proteins) + 1)
+        
+        for i in range(len(self._proteins)) :
+            Tkinter.Radiobutton(groupData2, text = self._proteins[i].name,
+                                command = self.toggleProteinData,
+                                var = self._currentData1,
+                                value = i).pack(anchor = Tkinter.W)
+            # make sure the correct data is shown from start
+            self.toggleProteinData()
+        Tkinter.Radiobutton(groupData2, text = 'None',
+                            command = self.toggleProteinData,
+                            var = self._currentData1,
+                            value = len(self._proteins) + 1).pack(anchor = Tkinter.W)
             
         self.root.mainloop()
     
@@ -280,9 +285,13 @@ class Interface :
         '''Check which proteins are active and make them visible, and request color table update'''
         # set color scale            
         # upgrade visibility
-        for i in range(len(self._toggleDataVars)) :
-            self._proteins[i].atoms.SetVisibility(self._toggleDataVars[i].get())
-            self._proteins[i].bonds.SetVisibility(self._toggleDataVars[i].get())
+        for i in range(len(self._proteins)) :
+            if self._currentData1.get() == i :
+                self._proteins[i].atoms.SetVisibility(1)
+                self._proteins[i].bonds.SetVisibility(1)
+            else :
+                self._proteins[i].atoms.SetVisibility(0)
+                self._proteins[i].bonds.SetVisibility(0)
 
         # also update the color bar
         self.updateVtkColors(*self.getScoreRange())
