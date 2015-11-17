@@ -8,11 +8,21 @@ if len(sys.argv) == 1 :
     sys.stderr.write('Using standard data set, to use other data:\n'.format(sys.argv[0]))
     sys.stderr.write('Usage: {0}  <pdb file> <connection file> |<protname> <data file>| [repeat || for multiple proteins]\n'.format(sys.argv[0]))
     INDATA = ('1U3W.pdb', 'adh_connections.txt',
-              ('ADH1', 'adh1_scores.txt'),
-              ('ADH2', 'adh2_scores.txt'),
-              ('ADH3', 'adh3_scores.txt'),
-              ('ADH4', 'adh4_scores.txt'),
-              ('ADH5', 'adh5_scores.txt'))
+              ('ADH1', 'adh1_conservation.txt'),
+              ('ADH2', 'adh2_conservation.txt'),
+              ('ADH3', 'adh3_conservation.txt'),
+              ('ADH4', 'adh4_conservation.txt'),
+              ('ADH5', 'adh5_conservation.txt'))
+
+    # alternative data set
+    # INDATA = ('1U3W.pdb', 'adh_connections.txt',
+    #           ('ADH1', 'adh1_scores.txt'),
+    #           ('ADH2', 'adh2_scores.txt'),
+    #           ('ADH3', 'adh3_scores.txt'),
+    #           ('ADH4', 'adh4_scores.txt'),
+    #           ('ADH5', 'adh5_scores.txt'))
+
+
 elif len(sys.argv) > 3 and len(sys.argv) % 2 != 1 :
     sys.stderr.write('Usage: {0} <pdb file> <connection file> |<protname> <data file>| [repeat || for multiple proteins]\n'.format(sys.argv[0]))
     sys.exit()
@@ -105,6 +115,7 @@ class Interface :
         return menuBar
     
     def initUI(self) :
+        '''Initialize the UI'''
         # initialise tkinter
         self.root = Tkinter.Tk()
         self.root.config(menu = self.initMenu())
@@ -139,10 +150,19 @@ class Interface :
             self._toggleDataBoxes.append(boxData)
             # make sure the checkboxes match the data shown from start
             self.toggleProteinData()
+
+        # display unified data sets
+        self._dataUnified = Tkinter.IntVar()
+        self._dataUnified.set(0)
+        self._toggleProteinStructureBox = Tkinter.Checkbutton(self.root, text = 'Display unified Data',
+                                                              command = self.toggleProteinStructure, state = 'active',
+                                                              var = self._proteinStructureVisible)
         
+            
         self.root.mainloop()
     
     def initVtk(self) :
+        '''Initialize the VTK renderer'''
         main = vtk.vtkRenderer()
         main.SetBackground(0.2, 0.2, 0.2)
         main.AddActor(self._protStruct)
@@ -157,8 +177,9 @@ class Interface :
         return main
     
     def initVtkAtoms(self, data) :
+        '''Initialize the residue representations'''
         sAtom = vtk.vtkSphereSource()
-        sAtom.SetRadius(0.5)
+        sAtom.SetRadius(0.5)# + len(self._proteins)/10.0)
         sAtom.SetThetaResolution(15)
         sAtom.SetPhiResolution(15)
         
@@ -173,11 +194,14 @@ class Interface :
         mAtom.SetScalarRange(*data.GetScalarRange())
         
         aAtom = vtk.vtkActor()
+#        aAtom.GetProperty().SetSpecular(0.1)
+#        aAtom.GetProperty().SetOpacity(0.5)
         aAtom.SetMapper(mAtom)
 
         return aAtom
 
     def initVtkBar(self) :
+        '''Initialize the bond connectors'''
         aSBar = vtk.vtkScalarBarActor()
         aSBar.SetOrientationToVertical()
         aSBar.SetLookupTable(self._lut)
@@ -196,7 +220,7 @@ class Interface :
         bond = vtk.vtkTubeFilter()
         bond.SetNumberOfSides(6)
         bond.SetInputData(data)
-        bond.SetRadius(0.15)
+        bond.SetRadius(0.15) # + len(self._proteins)/20.0)
         bond.SetVaryRadiusToVaryRadiusOff()
 
         mBond = vtk.vtkPolyDataMapper()
@@ -206,7 +230,8 @@ class Interface :
 
         aBond = vtk.vtkActor()
         aBond.SetMapper(mBond)
-        aBond.GetProperty().SetSpecular(0.1)
+#        aBond.GetProperty().SetSpecular(0.1)
+#        aBond.GetProperty().SetOpacity(0.5)
         
         return aBond
     
@@ -234,6 +259,15 @@ class Interface :
         
         return aProtein
 
+    def joinData(self, set1, set2) :
+        scal1 = data1.GetPoints().GetScalars()
+        scal2 = data2.GetPoints().GetScalars()
+        newScal = abs(scal1 - scal2)
+        newData = vtk.vtkPolyData()
+        newData.SetPoints(scal1.GetPoints())
+        newData.GetPoints().SetScalars(newScal)
+        return newData
+    
     def readData(self, scoreFile) :
         data = vtk.vtkPolyData()
         data.SetPoints(self._protCoord)
@@ -263,7 +297,6 @@ class Interface :
     def updateVtkColors(self, minValue, maxValue) :
         '''Update the value range of the color table'''
         self._lut.SetTableRange(minValue, maxValue)
-        print(self._lut.GetTableRange())
     
 if __name__ == '__main__' :
     interface = Interface(INDATA)
