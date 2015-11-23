@@ -1,4 +1,4 @@
-kimenu
+Protein Data Visualisation
 ======
 
 My project from the cours "Scientific Visualisation" at Uppsala University.
