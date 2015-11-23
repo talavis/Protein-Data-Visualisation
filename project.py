@@ -217,7 +217,7 @@ class Interface :
         return aAtom, gAtom
 
     def initVtkBar(self) :
-        '''Initialize the bond connectors'''
+        '''Initialize the scalar bar for color levels'''
         aSBar = vtk.vtkScalarBarActor()
         aSBar.SetOrientationToVertical()
         aSBar.SetLookupTable(self._lut)
@@ -233,6 +233,7 @@ class Interface :
         return aSBar
     
     def initVtkBonds(self, data) :
+        '''Initialize the bond connectors'''
         bond = vtk.vtkTubeFilter()
         bond.SetNumberOfSides(6)
         bond.SetInputData(data)
