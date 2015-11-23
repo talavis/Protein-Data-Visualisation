@@ -7,20 +7,21 @@ import sys
 if len(sys.argv) == 1 :
     sys.stderr.write('Using standard data set, to use other data:\n'.format(sys.argv[0]))
     sys.stderr.write('Usage: {0}  <pdb file> <connection file> |<protname> <data file>| [repeat || for multiple proteins]\n'.format(sys.argv[0]))
-    INDATA = ('1U3W.pdb', 'adh_connections.txt',
-              ('ADH1', 'adh1_conservation.txt'),
-              ('ADH2', 'adh2_conservation.txt'),
-              ('ADH3', 'adh3_conservation.txt'),
-              ('ADH4', 'adh4_conservation.txt'),
-              ('ADH5', 'adh5_conservation.txt'))
+    PREFIX = 'data/'
+    INDATA = (PREFIX + '1U3W.pdb', PREFIX + 'adh_connections.txt',
+              (PREFIX + 'ADH1', PREFIX + 'adh1_conservation.txt'),
+              (PREFIX + 'ADH2', PREFIX + 'adh2_conservation.txt'),
+              (PREFIX + 'ADH3', PREFIX + 'adh3_conservation.txt'),
+              (PREFIX + 'ADH4', PREFIX + 'adh4_conservation.txt'),
+              (PREFIX + 'ADH5', PREFIX + 'adh5_conservation.txt'))
 
     # alternative data set
-    # INDATA = ('1U3W.pdb', 'adh_connections.txt',
-    #           ('ADH1', 'adh1_scores.txt'),
-    #           ('ADH2', 'adh2_scores.txt'),
-    #           ('ADH3', 'adh3_scores.txt'),
-    #           ('ADH4', 'adh4_scores.txt'),
-    #           ('ADH5', 'adh5_scores.txt'))
+    # INDATA = (PREFIX + '1U3W.pdb', PREFIX + 'adh_connections.txt',
+    #           (PREFIX + 'ADH1', PREFIX + 'adh1_scores.txt'),
+    #           (PREFIX + 'ADH2', PREFIX + 'adh2_scores.txt'),
+    #           (PREFIX + 'ADH3', PREFIX + 'adh3_scores.txt'),
+    #           (PREFIX + 'ADH4', PREFIX + 'adh4_scores.txt'),
+    #           (PREFIX + 'ADH5', PREFIX + 'adh5_scores.txt'))
 
 
 elif len(sys.argv) > 3 and len(sys.argv) % 2 != 1 :
