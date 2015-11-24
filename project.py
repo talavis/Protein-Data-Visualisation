@@ -8,20 +8,20 @@ if len(sys.argv) == 1 :
     sys.stderr.write('Using standard data set, to use other data:\n'.format(sys.argv[0]))
     sys.stderr.write('Usage: {0}  <pdb file> <connection file> |<protname> <data file>| [repeat || for multiple proteins]\n'.format(sys.argv[0]))
     PREFIX = 'data/'
-    INDATA = (PREFIX + '1U3W.pdb', PREFIX + 'adh_connections.txt',
-              (PREFIX + 'ADH1', PREFIX + 'adh1_conservation.txt'),
-              (PREFIX + 'ADH2', PREFIX + 'adh2_conservation.txt'),
-              (PREFIX + 'ADH3', PREFIX + 'adh3_conservation.txt'),
-              (PREFIX + 'ADH4', PREFIX + 'adh4_conservation.txt'),
-              (PREFIX + 'ADH5', PREFIX + 'adh5_conservation.txt'))
+    #    INDATA = (PREFIX + '1U3W.pdb', PREFIX + 'adh_connections.txt',
+    #              (PREFIX + 'ADH1', PREFIX + 'adh1_conservation.txt'),
+    #              (PREFIX + 'ADH2', PREFIX + 'adh2_conservation.txt'),
+    #              (PREFIX + 'ADH3', PREFIX + 'adh3_conservation.txt'),
+    #              (PREFIX + 'ADH4', PREFIX + 'adh4_conservation.txt'),
+    #              (PREFIX + 'ADH5', PREFIX + 'adh5_conservation.txt'))
 
     # alternative data set
-    # INDATA = (PREFIX + '1U3W.pdb', PREFIX + 'adh_connections.txt',
-    #           (PREFIX + 'ADH1', PREFIX + 'adh1_scores.txt'),
-    #           (PREFIX + 'ADH2', PREFIX + 'adh2_scores.txt'),
-    #           (PREFIX + 'ADH3', PREFIX + 'adh3_scores.txt'),
-    #           (PREFIX + 'ADH4', PREFIX + 'adh4_scores.txt'),
-    #           (PREFIX + 'ADH5', PREFIX + 'adh5_scores.txt'))
+    INDATA = (PREFIX + '1U3W.pdb', PREFIX + 'adh_connections.txt',
+              (PREFIX + 'ADH1', PREFIX + 'adh1_scores.txt'),
+              (PREFIX + 'ADH2', PREFIX + 'adh2_scores.txt'),
+              (PREFIX + 'ADH3', PREFIX + 'adh3_scores.txt'),
+              (PREFIX + 'ADH4', PREFIX + 'adh4_scores.txt'),
+              (PREFIX + 'ADH5', PREFIX + 'adh5_scores.txt'))
 
 
 elif len(sys.argv) > 3 and len(sys.argv) % 2 != 1 :
@@ -181,7 +181,7 @@ class Interface :
     def initVtk(self) :
         '''Initialize the VTK renderer'''
         main = vtk.vtkRenderer()
-        main.SetBackground(0.2, 0.2, 0.2)
+        main.SetBackground(0.99, 0.99, 0.99)
         main.AddActor(self._protStruct)
         self._dataVisualiserAtoms = self.initVtkAtoms(self._proteins[0].data)
         self._dataVisualiserBonds = self.initVtkBonds(self._proteins[0].data)
