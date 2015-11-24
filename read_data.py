@@ -58,3 +58,14 @@ def read_connections(filename):
         line = text_file.readline()
     text_file.close()
     return connections
+
+#def read_name(fileName) :
+#    '''Get pdb identifier'''
+#    # assuming identifier is at end of HEADER line
+#    with open(fileName) as f :
+#        for line in f :
+#            data = line.split()
+ #           if data[0] == 'HEADER' :
+ #x               return data[-1]
+    
+    
